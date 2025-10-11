@@ -79,13 +79,15 @@ func _run_test_file(file: String) -> void:
     for m in methods:
         if not m.name.begins_with("test_"):
             continue
-        var result: Dictionary = _execute_test_method(instance, m.name)
+        var result: Dictionary = _run_single_test(instance, m.name)
         test_results.append(result)
 
 
-func _execute_test_method(instance: Object, method_name: String) -> Dictionary:
-    ## Execute a single test method
-    print(" •", method_name)
+func _run_single_test(instance: Object, method_name: String) -> Dictionary:
+    ## Execute a single test method and return the result
+
+    # Print initial status with printraw to allow overwriting it later
+    printraw(" • Running " + method_name + "...")
 
     # Ensure the method exists before calling
     if not instance.has_method(method_name):
@@ -100,6 +102,18 @@ func _execute_test_method(instance: Object, method_name: String) -> Dictionary:
 
     if not TestUtils.validate_test_result_format(result):
         return TestUtils.create_test_result(false, "Incorrect test result format for: " + method_name + " (Did you use TestUtils.create_test_result?)")
+
+    # DEBUG, wait 1s
+    OS.delay_msec(1000)
+
+    # Display success/failure inline by overwriting the initial status
+    var ok: bool = result.get("status", false)
+    var msg: String = result.get("message", "")
+    if ok:
+        printraw("\u001b[2K\r • " + method_name + " ✅ Passed -> " + msg)  # \u001b[2K\r is to clear the line and move to the start of the line
+    else:
+        printraw("\u001b[2K\r • " + method_name + " ❌ Failed -> " + msg)  # \u001b[2K\r is to clear the line and move to the start of the line
+    print()  # Print a new line to separate the results
 
     return result
 
