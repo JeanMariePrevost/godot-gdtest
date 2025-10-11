@@ -8,7 +8,7 @@ static func create_test_result(ok: bool, message: String) -> Dictionary:
     var caller: Dictionary = stack[1] if stack.size() > 1 else {} as Dictionary
     return {
         "status": ok,
-        "message": message,
+        "message": "" if ok else message,
         "function_name": caller.get("function", "<unknown>"),
         "file_name": _extract_file_name(caller.get("source", "<unknown>")),
         "line_number": caller.get("line", 0),

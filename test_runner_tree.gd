@@ -79,15 +79,15 @@ func _run_test_file(file: String) -> void:
     for m in methods:
         if not m.name.begins_with("test_"):
             continue
-        var result: Dictionary = _run_single_test(instance, m.name)
+        var result: Dictionary = _run_single_test(instance, file, m.name)
         test_results.append(result)
 
 
-func _run_single_test(instance: Object, method_name: String) -> Dictionary:
+func _run_single_test(instance: Object, file_name: String, method_name: String) -> Dictionary:
     ## Execute a single test method and return the result
 
     # Print initial status with printraw to allow overwriting it later
-    printraw(" • Running " + method_name + "...")
+    printraw(" > " + file_name + "::" + method_name + " \u001b[90m(running)\u001b[0m")
 
     # Ensure the method exists before calling
     if not instance.has_method(method_name):
@@ -98,35 +98,49 @@ func _run_single_test(instance: Object, method_name: String) -> Dictionary:
 
     # Ensure the test returns a Dictionary with the correct keys, create a special error result if not
     if typeof(result) != TYPE_DICTIONARY:
-        return TestUtils.create_test_result(false, "Unexpected result object for test: " + method_name)
+        return TestUtils.create_test_result(false, "Unexpected result object for test: " + file_name + "::" + method_name)
 
     if not TestUtils.validate_test_result_format(result):
-        return TestUtils.create_test_result(false, "Incorrect test result format for: " + method_name + " (Did you use TestUtils.create_test_result?)")
+        return TestUtils.create_test_result(false, "Incorrect test result format for: " + file_name + "::" + method_name + " (Did you use TestUtils.create_test_result?)")
 
     # DEBUG, wait 1s
-    OS.delay_msec(1000)
+    OS.delay_msec(200)
 
     # Display success/failure inline by overwriting the initial status
     var ok: bool = result.get("status", false)
     var msg: String = result.get("message", "")
     if ok:
-        printraw("\u001b[2K\r • " + method_name + " ✅ Passed -> " + msg)  # \u001b[2K\r is to clear the line and move to the start of the line
+        printraw("\u001b[2K\r > " + file_name + "::" + method_name + " \u001b[32m(passed)\u001b[0m")  # \u001b[2K\r is to clear the line and move to the start of the line, \u001b[32m makes "Passed" green, \u001b[0m resets color
     else:
-        printraw("\u001b[2K\r • " + method_name + " ❌ Failed -> " + msg)  # \u001b[2K\r is to clear the line and move to the start of the line
+        printraw("\u001b[2K\r > " + file_name + "::" + method_name + " \u001b[31m(failed)\u001b[0m \u001b[90m(" + msg + ")\u001b[0m")  # \u001b[2K\r is to clear the line and move to the start of the line, \u001b[31m makes "(failed)" red, \u001b[90m makes message dark gray, \u001b[0m resets color
     print()  # Print a new line to separate the results
 
     return result
 
 
 func print_summary() -> void:
-    print("\n[ Debug: All tests complete ]")
-
-    var passed: int = 0
-    var total: int = test_results.size()
+    var total := test_results.size()
+    var passed := 0
     for result in test_results:
-        if result["status"]:
+        if result.get("status", false):
             passed += 1
-    print("[ Summary ] %d passed / %d failed" % [passed, total - passed])
+    var failed := total - passed
+
+    print("")  # spacer line
+    print("────────────────────────────")
+    print(" RESULTS")
+    print("────────────────────────────")
+    print(" " + str(total) + " tests run")
+    print(" \u001b[32m" + str(passed) + " tests passed\u001b[0m")
+    if failed > 0:
+        print(" \u001b[31m" + str(failed) + " tests failed\u001b[0m")
+    else:
+        print(" \u001b[90m" + str(failed) + " tests failed\u001b[0m")
+
+    if failed == 0:
+        print("\n \u001b[1m\u001b[32mAll tests passed\u001b[0m")
+
+    print("────────────────────────────")
 
 
 func exit_safely() -> void:
