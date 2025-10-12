@@ -1,8 +1,11 @@
+# NOTE: Run in terminal with godot4c-nomono --headless -s res://utils/test_runner_tree.gd
+
 extends SceneTree
 
 const TESTS_PATH: String = "res://tests"
 var test_files: Array[String] = []
 var test_results: Array[Dictionary] = []
+var errors: Array[String] = []
 
 
 func _initialize():
@@ -70,7 +73,11 @@ func _run_test_file(file: String) -> void:
 
     var script: Script = load(path)
     if script == null:
-        push_error("[Error] Failed to load script: " + path)
+        errors.append("[Error] Failed to load script: " + path)
+        return
+
+    if not script.can_instantiate():
+        errors.append("[Error] Script at " + path + " failed to compile or can't be instantiated.")
         return
 
     var instance: Object = script.new()
@@ -92,16 +99,16 @@ func _run_single_test(instance: Object, file_name: String, method_name: String) 
     # Ensure the method exists before calling
     if not instance.has_method(method_name):
         push_error("[Error] Missing method: " + method_name)
-        return TestUtils.create_test_result(false, "Missing method: " + method_name)
+        return TestUtils.fail_test("Missing method: " + method_name)
 
     var result: Variant = instance.call(method_name)
 
     # Ensure the test returns a Dictionary with the correct keys, create a special error result if not
     if typeof(result) != TYPE_DICTIONARY:
-        return TestUtils.create_test_result(false, "Unexpected result object for test: " + file_name + "::" + method_name)
+        return TestUtils.fail_test("Unexpected result object for test: " + file_name + "::" + method_name)
 
     if not TestUtils.validate_test_result_format(result):
-        return TestUtils.create_test_result(false, "Incorrect test result format for: " + file_name + "::" + method_name + " (Did you use TestUtils.create_test_result?)")
+        return TestUtils.fail_test("Incorrect test result format for: " + file_name + "::" + method_name + " (Did you use TestUtils.create_test_result?)")
 
     # DEBUG, wait between tests to see the progression better
     OS.delay_msec(20)
@@ -119,6 +126,8 @@ func _run_single_test(instance: Object, file_name: String, method_name: String) 
 
 
 func print_summary() -> void:
+    print("\u001b[36m[Debug] Printing summary\u001b[0m")
+    print("\u001b[36m[Debug] Total tests: " + str(test_results.size()) + "\u001b[0m")
     var total := test_results.size()
     var passed := 0
     for result in test_results:
@@ -139,6 +148,11 @@ func print_summary() -> void:
 
     if failed == 0:
         print("\n \u001b[1m\u001b[32mAll tests passed\u001b[0m")
+
+    if errors.size() > 0:
+        print("\n \u001b[1m\u001b[31mErrors were encountered:\u001b[0m")
+        for error in errors:
+            print(" " + error)
 
     print("────────────────────────────")
 
