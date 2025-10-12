@@ -16,6 +16,7 @@ const TESTS_PATH: String = "res://tests"
 var test_files: Array[String] = []
 var test_results: Array[TestResult] = []
 var errors: Array[String] = []
+var tests_functions_processed: int = 0
 
 
 ## Entrypoint for the whole process, automatically called when making this the SceneTree.
@@ -103,6 +104,7 @@ func _run_test_file(file: String) -> void:
     for m in methods:
         if not m.name.begins_with("test_"):
             continue
+        tests_functions_processed += 1
         var result: TestResult = _run_single_test(test_file_instance, file, m.name)
         test_results.append(result)
 
@@ -179,7 +181,7 @@ func print_summary() -> void:
     print("├────────────────────────────────────────────────────")
     print("│ SUMMARY")
     print("├────────────────────────────────────────────────────")
-    print("│  " + str(total) + " tests run")
+    print("│  " + str(tests_functions_processed) + " tests found")
     print("│  \u001b[32m" + str(passed) + " tests passed\u001b[0m")
     if failed > 0:
         print("│  \u001b[31m" + str(failed) + " tests failed\u001b[0m")
