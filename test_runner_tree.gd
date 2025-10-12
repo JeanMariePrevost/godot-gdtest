@@ -103,8 +103,8 @@ func _run_single_test(instance: Object, file_name: String, method_name: String) 
     if not TestUtils.validate_test_result_format(result):
         return TestUtils.create_test_result(false, "Incorrect test result format for: " + file_name + "::" + method_name + " (Did you use TestUtils.create_test_result?)")
 
-    # DEBUG, wait 1s
-    OS.delay_msec(200)
+    # DEBUG, wait between tests to see the progression better
+    OS.delay_msec(20)
 
     # Display success/failure inline by overwriting the initial status
     var ok: bool = result.get("status", false)
