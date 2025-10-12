@@ -174,7 +174,7 @@ func print_summary() -> void:
                 if not result.passed:
                     file_failed -= 1
                     var node_string := "├──" if file_failed > 0 else "└──"
-                    print("│    \u001b[90m" + node_string + "[" + str(result.file_name) + ":" + str(result.line_number) + "] " + result.error_message + "\u001b[0m")
+                    print("│   " + "\u001b[90m" + node_string + " " + result.function_name + " -> " + result.error_message + " " + "[ln:" + str(result.line_number) + "]\u001b[0m")
         else:
             print("│ - " + "\u001b[33m" + file_name + " (skipped)\u001b[0m")
 
