@@ -1,17 +1,17 @@
+## The base class for any test file
+
 extends RefCounted
-class_name TestUtils
-
-# ------------------ Assertions
+class_name TestFile
 
 
-static func pass_test() -> Dictionary:
+func pass_test() -> TestResult:
     ## Manually pass a test
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.pass_test()
     return _create_test_result(true, "")
 
 
-static func fail_test(error_message: String = "") -> Dictionary:
+func fail_test(error_message: String = "") -> TestResult:
     ## Manually fail a test
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.fail_test()
@@ -20,7 +20,7 @@ static func fail_test(error_message: String = "") -> Dictionary:
     return _create_test_result(false, error_message)
 
 
-static func assert_true(condition: bool, error_message: String = "") -> Dictionary:
+func assert_true(condition: bool, error_message: String = "") -> TestResult:
     ## Assert that a condition is true
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_true(a+b >= c)
@@ -29,7 +29,7 @@ static func assert_true(condition: bool, error_message: String = "") -> Dictiona
     return _create_test_result(condition, error_message)
 
 
-static func assert_false(condition: bool, error_message: String = "") -> Dictionary:
+func assert_false(condition: bool, error_message: String = "") -> TestResult:
     ## Assert that a condition is false
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_false(a+b == c)
@@ -38,7 +38,7 @@ static func assert_false(condition: bool, error_message: String = "") -> Diction
     return _create_test_result(not condition, error_message)
 
 
-static func assert_equal(expected: Variant, actual: Variant, error_message: String = "") -> Dictionary:
+func assert_equal(expected: Variant, actual: Variant, error_message: String = "") -> TestResult:
     ## Assert that two values are equal using the "==" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_equal(a+b, c)
@@ -47,7 +47,7 @@ static func assert_equal(expected: Variant, actual: Variant, error_message: Stri
     return _create_test_result(expected == actual, error_message)
 
 
-static func assert_equal_almost(expected: Variant, actual: Variant, tolerance: float, error_message: String = "") -> Dictionary:
+func assert_equal_almost(expected: Variant, actual: Variant, tolerance: float, error_message: String = "") -> TestResult:
     ## Assert that two values are approximately equal within a tolerance
     ## Handles numeric types (int, float) and vector types (Vector2, Vector3, Vector4)
     ## Use at the end of a test by returning the result, e.g.
@@ -83,7 +83,7 @@ static func assert_equal_almost(expected: Variant, actual: Variant, tolerance: f
     return _create_test_result(result, error_message)
 
 
-static func assert_not_equal(expected: Variant, actual: Variant, error_message: String = "") -> Dictionary:
+func assert_not_equal(expected: Variant, actual: Variant, error_message: String = "") -> TestResult:
     ## Assert that two values are not equal using the "!=" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_not_equal(a+b, c)
@@ -92,7 +92,7 @@ static func assert_not_equal(expected: Variant, actual: Variant, error_message: 
     return _create_test_result(expected != actual, error_message)
 
 
-static func assert_not_equal_almost(expected: Variant, actual: Variant, tolerance: float = 0.0001, error_message: String = "") -> Dictionary:
+func assert_not_equal_almost(expected: Variant, actual: Variant, tolerance: float = 0.0001, error_message: String = "") -> TestResult:
     ## Assert that two values are not approximately equal within a tolerance
     ## Handles numeric types (int, float) and vector types (Vector2, Vector3, Vector4)
     ## Use at the end of a test by returning the result, e.g.
@@ -128,7 +128,7 @@ static func assert_not_equal_almost(expected: Variant, actual: Variant, toleranc
     return _create_test_result(result, error_message)
 
 
-static func assert_greater_than(a: Variant, b: Variant, error_message: String = "") -> Dictionary:
+func assert_greater_than(a: Variant, b: Variant, error_message: String = "") -> TestResult:
     ## Assert that a is greater than b using the ">" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_greater_than(a, b)
@@ -137,7 +137,7 @@ static func assert_greater_than(a: Variant, b: Variant, error_message: String = 
     return _create_test_result(a > b, error_message)
 
 
-static func assert_greater_than_or_equal(a: Variant, b: Variant, error_message: String = "") -> Dictionary:
+func assert_greater_than_or_equal(a: Variant, b: Variant, error_message: String = "") -> TestResult:
     ## Assert that a is greater than or equal to b using the ">=" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_greater_than_or_equal(a, b)
@@ -146,7 +146,7 @@ static func assert_greater_than_or_equal(a: Variant, b: Variant, error_message: 
     return _create_test_result(a >= b, error_message)
 
 
-static func assert_less_than(a: Variant, b: Variant, error_message: String = "") -> Dictionary:
+func assert_less_than(a: Variant, b: Variant, error_message: String = "") -> TestResult:
     ## Assert that a is less than b using the "<" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_less_than(a, b)
@@ -155,7 +155,7 @@ static func assert_less_than(a: Variant, b: Variant, error_message: String = "")
     return _create_test_result(a < b, error_message)
 
 
-static func assert_less_than_or_equal(a: Variant, b: Variant, error_message: String = "") -> Dictionary:
+func assert_less_than_or_equal(a: Variant, b: Variant, error_message: String = "") -> TestResult:
     ## Assert that a is less than or equal to b using the "<=" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_less_than_equal(a, b)
@@ -164,7 +164,7 @@ static func assert_less_than_or_equal(a: Variant, b: Variant, error_message: Str
     return _create_test_result(a <= b, error_message)
 
 
-static func assert_null(value: Variant, error_message: String = "") -> Dictionary:
+func assert_null(value: Variant, error_message: String = "") -> TestResult:
     ## Assert that a value is null
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_null(some_value)
@@ -173,7 +173,7 @@ static func assert_null(value: Variant, error_message: String = "") -> Dictionar
     return _create_test_result(value == null, error_message)
 
 
-static func assert_not_null(value: Variant, error_message: String = "") -> Dictionary:
+func assert_not_null(value: Variant, error_message: String = "") -> TestResult:
     ## Assert that a value is not null
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_not_null(some_value)
@@ -182,7 +182,7 @@ static func assert_not_null(value: Variant, error_message: String = "") -> Dicti
     return _create_test_result(value != null, error_message)
 
 
-static func assert_has_method(value: Variant, method_name: String, error_message: String = "") -> Dictionary:
+func assert_has_method(value: Variant, method_name: String, error_message: String = "") -> TestResult:
     ## Assert that a value has a method
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_has_method(some_value, "some_method")
@@ -191,7 +191,7 @@ static func assert_has_method(value: Variant, method_name: String, error_message
     return _create_test_result(value.has_method(method_name), error_message)
 
 
-static func assert_not_has_method(value: Variant, method_name: String, error_message: String = "") -> Dictionary:
+func assert_not_has_method(value: Variant, method_name: String, error_message: String = "") -> TestResult:
     ## Assert that a value does not have a method
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_not_has_method(some_value, "some_method")
@@ -200,7 +200,7 @@ static func assert_not_has_method(value: Variant, method_name: String, error_mes
     return _create_test_result(not value.has_method(method_name), error_message)
 
 
-static func assert_has_property(value: Variant, property_name: String, error_message: String = "") -> Dictionary:
+func assert_has_property(value: Variant, property_name: String, error_message: String = "") -> TestResult:
     ## Assert that a value has a property
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_has_property(some_value, "some_property")
@@ -209,7 +209,7 @@ static func assert_has_property(value: Variant, property_name: String, error_mes
     return _create_test_result(value.has_property(property_name), error_message)
 
 
-static func assert_not_has_property(value: Variant, property_name: String, error_message: String = "") -> Dictionary:
+func assert_not_has_property(value: Variant, property_name: String, error_message: String = "") -> TestResult:
     ## Assert that a value does not have a property
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_not_has_property(some_value, "some_property")
@@ -218,7 +218,7 @@ static func assert_not_has_property(value: Variant, property_name: String, error
     return _create_test_result(not value.has_property(property_name), error_message)
 
 
-static func assert_contains(container: Variant, item: Variant, error_message: String = "") -> Dictionary:
+func assert_contains(container: Variant, item: Variant, error_message: String = "") -> TestResult:
     ## Assert that a collection/object contains an item
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_contains(some_array, item)
@@ -228,14 +228,14 @@ static func assert_contains(container: Variant, item: Variant, error_message: St
     return _create_test_result(result, error_message)
 
 
-static func assert_not_contains(container: Variant, item: Variant, error_message: String = "") -> Dictionary:
+func assert_not_contains(container: Variant, item: Variant, error_message: String = "") -> TestResult:
     var result := _contains(container, item)
     if error_message == "":
         error_message = "Expected " + str(container) + " to not contain " + str(item)
     return _create_test_result(not result, error_message)
 
 
-static func assert_contains_all(container: Variant, items: Array[Variant], error_message: String = "") -> Dictionary:
+func assert_contains_all(container: Variant, items: Array[Variant], error_message: String = "") -> TestResult:
     ## Assert that a container contains all items in an array
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_contains_all(some_array, [item1, item2, item3])
@@ -254,7 +254,7 @@ static func assert_contains_all(container: Variant, items: Array[Variant], error
     return _create_test_result(true, "")
 
 
-static func assert_contains_none(container: Variant, items: Array[Variant], error_message: String = "") -> Dictionary:
+func assert_contains_none(container: Variant, items: Array[Variant], error_message: String = "") -> TestResult:
     ## Assert that a container does not contain any items in an array
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_contains_none(some_array, [item1, item2, item3])
@@ -267,7 +267,7 @@ static func assert_contains_none(container: Variant, items: Array[Variant], erro
     return _create_test_result(true, "")
 
 
-static func assert_type_name(value: Variant, expected_type_name: String, error_message: String = "") -> Dictionary:
+func assert_type_name(value: Variant, expected_type_name: String, error_message: String = "") -> TestResult:
     ## Assert that a value matches the given type or class name.
     ##
     ## Works for both built-in types (e.g. "int", "Array") and custom classes.
@@ -326,33 +326,25 @@ static func assert_type_name(value: Variant, expected_type_name: String, error_m
 # ------------------ Helper functions
 
 
-static func _create_test_result(test_passed: bool, error_message: String) -> Dictionary:
+func _create_test_result(test_passed: bool, error_message: String) -> TestResult:
     ## Helper to create a standardized test result object
     var stack: Array[Dictionary] = get_stack()
     var caller: Dictionary = stack[1] if stack.size() > 1 else {} as Dictionary
     # TODO: Dynamically look up the stack 2-5 times trying to "exit TestUtils" instead of a hardcoded index
-    return {
-        "passed": test_passed,
-        "message": "" if test_passed else error_message,
-        "function_name": caller.get("function", "<unknown>"),
-        "file_name": _extract_file_name(caller.get("source", "<unknown>")),
-        "line_number": caller.get("line", 0),
-    }
+    var test_result: TestResult = TestResult.new(
+        test_passed, error_message, caller.get("function", "<unknown>"), _extract_file_name(caller.get("source", "<unknown>")), caller.get("line", 0)
+    )
+    return test_result
 
 
-static func validate_test_result_format(result: Dictionary) -> bool:
-    ## Helper to validate the format of a test result object
-    return result.has("passed") and result.has("message") and result.has("function_name") and result.has("file_name") and result.has("line_number")
-
-
-static func _extract_file_name(path: String) -> String:
-    ## Extract the file name from a path
+func _extract_file_name(path: String) -> String:
+    ## Extract the file name portion from a path
     if path == "<unknown>":
         return path
     return path.get_file()
 
 
-static func _contains(container: Variant, item: Variant) -> bool:
+func _contains(container: Variant, item: Variant) -> bool:
     ## Helper to check if any common collection type contains an item
     ## Works for arrays, dictionaries, strings, and objects that implement a "has" method
     if container == null:

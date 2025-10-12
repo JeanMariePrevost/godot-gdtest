@@ -4,7 +4,7 @@ extends SceneTree
 
 const TESTS_PATH: String = "res://tests"
 var test_files: Array[String] = []
-var test_results: Array[Dictionary] = []
+var test_results: Array[TestResult] = []
 var errors: Array[String] = []
 
 
@@ -86,11 +86,11 @@ func _run_test_file(file: String) -> void:
     for m in methods:
         if not m.name.begins_with("test_"):
             continue
-        var result: Dictionary = _run_single_test(instance, file, m.name)
+        var result: TestResult = _run_single_test(instance, file, m.name)
         test_results.append(result)
 
 
-func _run_single_test(instance: Object, file_name: String, method_name: String) -> Dictionary:
+func _run_single_test(instance: Object, file_name: String, method_name: String) -> TestResult:
     ## Execute a single test method and return the result
 
     # Print initial status with printraw to allow overwriting it later
@@ -99,27 +99,20 @@ func _run_single_test(instance: Object, file_name: String, method_name: String) 
     # Ensure the method exists before calling
     if not instance.has_method(method_name):
         push_error("[Error] Missing method: " + method_name)
-        return TestUtils.fail_test("Missing method: " + method_name)
+        return TestResult.new(false, "Missing method: " + method_name, file_name, method_name, 0)
 
     var result: Variant = instance.call(method_name)
 
-    # Ensure the test returns a Dictionary with the correct keys, create a special error result if not
-    if typeof(result) != TYPE_DICTIONARY:
-        return TestUtils.fail_test("Unexpected result object for test: " + file_name + "::" + method_name)
-
-    if not TestUtils.validate_test_result_format(result):
-        return TestUtils.fail_test("Incorrect test result format for: " + file_name + "::" + method_name + " (Did you use TestUtils.create_test_result?)")
+    print("DEBUG: Ran test " + method_name + " and got result " + str(result.passed))
 
     # DEBUG, wait between tests to see the progression better
     OS.delay_msec(3)
 
     # Display success/failure inline by overwriting the initial status
-    var ok: bool = result.get("passed", false)
-    var msg: String = result.get("message", "")
-    if ok:
+    if result.passed:
         printraw("\u001b[2K\r > " + file_name + "::" + method_name + " \u001b[32m(passed)\u001b[0m")  # \u001b[2K\r is to clear the line and move to the start of the line, \u001b[32m makes "Passed" green, \u001b[0m resets color
     else:
-        printraw("\u001b[2K\r > " + file_name + "::" + method_name + " \u001b[31m(failed)\u001b[0m \u001b[90m(" + msg + ")\u001b[0m")  # \u001b[2K\r is to clear the line and move to the start of the line, \u001b[31m makes "(failed)" red, \u001b[90m makes message dark gray, \u001b[0m resets color
+        printraw("\u001b[2K\r > " + file_name + "::" + method_name + " \u001b[31m(failed)\u001b[0m \u001b[90m(" + result.error_message + ")\u001b[0m")  # \u001b[2K\r is to clear the line and move to the start of the line, \u001b[31m makes "(failed)" red, \u001b[90m makes message dark gray, \u001b[0m resets color
     print()  # Print a new line to separate the results
 
     return result
@@ -131,7 +124,7 @@ func print_summary() -> void:
     var total := test_results.size()
     var passed := 0
     for result in test_results:
-        if result.get("passed", false):
+        if result.passed:
             passed += 1
     var failed := total - passed
 
