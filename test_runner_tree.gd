@@ -1,4 +1,14 @@
-# NOTE: Run in terminal with godot4c-nomono --headless -s res://utils/test_runner_tree.gd
+## A simple test runner for headless Godot instances.
+##
+## This script is designed to run tests in a headless Godot instance, from the CLI.
+## It discovers test files in the `TESTS_PATH` directory, runs them, and prints the results.
+##
+## Basic usage:
+##     [your Godot binary] --headless -s res://utils/test_runner_tree.gd
+## For example:
+##     godot4-nomono --headless -s res://utils/test_runner_tree.gd
+##     or
+##     & "D:\Work\Godot_Binaries\Godot_v4.5-stable_win64\Godot_v4.5-stable_win64.exe" --headless -s res://utils/test_runner_tree.gd
 
 extends SceneTree
 
