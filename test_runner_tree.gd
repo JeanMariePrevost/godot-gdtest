@@ -80,7 +80,7 @@ func _run_test_file(file: String) -> void:
         errors.append("[Error] Script at " + path + " failed to compile or can't be instantiated.")
         return
 
-    var instance: Object = script.new()
+    var instance: TestFile = script.new()
     var methods: Array[Dictionary] = instance.get_method_list()
 
     for m in methods:
@@ -90,7 +90,7 @@ func _run_test_file(file: String) -> void:
         test_results.append(result)
 
 
-func _run_single_test(instance: Object, file_name: String, method_name: String) -> TestResult:
+func _run_single_test(instance: TestFile, file_name: String, method_name: String) -> TestResult:
     ## Execute a single test method and return the result
 
     # Print initial status with printraw to allow overwriting it later
@@ -101,7 +101,7 @@ func _run_single_test(instance: Object, file_name: String, method_name: String) 
         push_error("[Error] Missing method: " + method_name)
         return TestResult.new(false, "Missing method: " + method_name, file_name, method_name, 0)
 
-    var result: Variant = instance.call(method_name)
+    var result: TestResult = instance.call(method_name)
 
     print("DEBUG: Ran test " + method_name + " and got result " + str(result.passed))
 
