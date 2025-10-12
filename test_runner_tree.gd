@@ -18,11 +18,9 @@ var test_results: Array[TestResult] = []
 var errors: Array[String] = []
 
 
+## Entrypoint for the whole process, automatically called when making this the SceneTree.
 func _initialize():
-    ## Entrypoint for the headless Godot instance
-    ## Launched with this or similar:
-    ##     godot4c-nomono --headless -s res://utils/test_runner_tree.gd
-    print("[ Debug: Test Runner Starting ]")
+    print("[ Test Runner Starting ]")
 
     if not _validate_test_directory():
         quit(1)
@@ -34,9 +32,8 @@ func _initialize():
     exit_safely()
 
 
+## Ensures the tests directory is valid and can be opened
 func _validate_test_directory() -> bool:
-    ## Return true if the tests directory is valid, false otherwise
-
     # Check if the tests directory exists
     if not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path(TESTS_PATH)):
         push_error("[Error] Tests directory not found: " + TESTS_PATH)
@@ -51,8 +48,10 @@ func _validate_test_directory() -> bool:
     return true
 
 
+## Discover all the test files in the tests directory and add them to the test_files array
+##
+## At this stage, every ".gd" file in TESTS_PATH is considered.
 func _discover_test_files() -> void:
-    ## Discover all the test files in the tests directory and add them to the test_files array
     var dir: DirAccess = DirAccess.open(TESTS_PATH)
     if dir == null:
         push_error("[Error] Could not open tests directory (should not happen)")
@@ -70,14 +69,14 @@ func _discover_test_files() -> void:
         print("[ Debug: Found %d test file(s) ]" % test_files.size())
 
 
+## Run all the test files in the test_files array
 func _run_all_tests() -> void:
-    ## Run all the test files in the test_files array
     for file: String in test_files:
         _run_test_file(file)
 
 
+## Loads and validates a test file, then runs all the tests inside it
 func _run_test_file(file: String) -> void:
-    ## Run tests from a single test file
     var path: String = TESTS_PATH.path_join(file)
     print("\n[ Running:", file, "]")
 
@@ -90,19 +89,26 @@ func _run_test_file(file: String) -> void:
         errors.append("[Error] Script at " + path + " failed to compile or can't be instantiated.")
         return
 
-    var instance: TestFile = script.new()
-    var methods: Array[Dictionary] = instance.get_method_list()
+    var test_file_instance: Object = script.new()
+    if test_file_instance == null:
+        errors.append("[Error] Failed to instantiate script: " + path)
+        return
+
+    if not test_file_instance is TestFile:
+        errors.append("[Error] Script at " + path + " does not inherit from TestFile and was ignored.")
+        return
+
+    var methods: Array[Dictionary] = test_file_instance.get_method_list()
 
     for m in methods:
         if not m.name.begins_with("test_"):
             continue
-        var result: TestResult = _run_single_test(instance, file, m.name)
+        var result: TestResult = _run_single_test(test_file_instance, file, m.name)
         test_results.append(result)
 
 
+## Execute a single test method and return the result
 func _run_single_test(instance: TestFile, file_name: String, method_name: String) -> TestResult:
-    ## Execute a single test method and return the result
-
     # Print initial status with printraw to allow overwriting it later
     printraw(" > " + file_name + "::" + method_name + " \u001b[90m(running)\u001b[0m")
 
@@ -112,8 +118,6 @@ func _run_single_test(instance: TestFile, file_name: String, method_name: String
         return TestResult.new(false, "Missing method: " + method_name, file_name, method_name, 0)
 
     var result: TestResult = instance.call(method_name)
-
-    print("DEBUG: Ran test " + method_name + " and got result " + str(result.passed))
 
     # DEBUG, wait between tests to see the progression better
     OS.delay_msec(3)
@@ -128,6 +132,7 @@ func _run_single_test(instance: TestFile, file_name: String, method_name: String
     return result
 
 
+## Displays a summary of the test results to the console
 func print_summary() -> void:
     print("\u001b[36m[Debug] Printing summary\u001b[0m")
     print("\u001b[36m[Debug] Total tests: " + str(test_results.size()) + "\u001b[0m")
@@ -160,7 +165,7 @@ func print_summary() -> void:
     print("────────────────────────────")
 
 
+## Exit the process safely, waiting for a frame to ensure all print statements are flushed (still required?)
 func exit_safely() -> void:
-    ## Exit the process safely, waiting for a frame to ensure all print statements are flushed
     await process_frame
     quit(0)
