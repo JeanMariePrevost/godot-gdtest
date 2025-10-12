@@ -127,6 +127,8 @@ func _run_single_test(instance: TestFile, file_name: String, method_name: String
         printraw("\u001b[2K\r > " + file_name + "::" + method_name + " \u001b[32m(passed)\u001b[0m")  # \u001b[2K\r is to clear the line and move to the start of the line, \u001b[32m makes "Passed" green, \u001b[0m resets color
     else:
         printraw("\u001b[2K\r > " + file_name + "::" + method_name + " \u001b[31m(failed)\u001b[0m \u001b[90m(" + result.error_message + ")\u001b[0m")  # \u001b[2K\r is to clear the line and move to the start of the line, \u001b[31m makes "(failed)" red, \u001b[90m makes message dark gray, \u001b[0m resets color
+        # Append the line number to the error message
+        printraw(" \u001b[90m[" + str(result.file_name) + ":" + str(result.line_number) + "]\u001b[0m")
     print()  # Print a new line to separate the results
 
     return result
@@ -134,8 +136,6 @@ func _run_single_test(instance: TestFile, file_name: String, method_name: String
 
 ## Displays a summary of the test results to the console
 func print_summary() -> void:
-    print("\u001b[36m[Debug] Printing summary\u001b[0m")
-    print("\u001b[36m[Debug] Total tests: " + str(test_results.size()) + "\u001b[0m")
     var total := test_results.size()
     var passed := 0
     for result in test_results:
@@ -148,14 +148,13 @@ func print_summary() -> void:
 
     for result in test_results:
         if not test_files_groups.has(result.file_name):
-            print("[Debug] Adding file " + result.file_name + " to test_files_groups")
             test_files_groups[result.file_name] = []
         test_files_groups[result.file_name].append(result)
 
     print("")  # spacer line
-    print("────────────────────────────")
-    print(" RESULTS")
-    print("────────────────────────────")
+    print("┌────────────────────────────────────────────────────")
+    print("│ RESULTS")
+    print("├────────────────────────────────────────────────────")
 
     # Print per-file aggregate results
     for file_name in test_files:
@@ -168,28 +167,34 @@ func print_summary() -> void:
                 else:
                     file_failed += 1
             var base_color := "\u001b[32m" if file_passed > 0 and file_failed == 0 else "\u001b[31m"
-            print(" - " + base_color + file_name + " (" + str(file_passed) + " passed, " + str(file_failed) + " failed)\u001b[0m")
+            print("│ " + base_color + file_name + " (" + str(file_passed) + " passed, " + str(file_failed) + " failed)\u001b[0m")
+            for result in test_files_groups[file_name]:
+                if not result.passed:
+                    file_failed -= 1
+                    var node_string := "├──" if file_failed > 0 else "└──"
+                    print("│    \u001b[90m" + node_string + "[" + str(result.file_name) + ":" + str(result.line_number) + "] " + result.error_message + "\u001b[0m")
         else:
-            print(" - " + "\u001b[33m" + file_name + " (skipped)\u001b[0m")
+            print("│ - " + "\u001b[33m" + file_name + " (skipped)\u001b[0m")
 
-    print("────────────────────────────")
-    print("SUMMARY:")
-    print(" " + str(total) + " tests run")
-    print(" \u001b[32m" + str(passed) + " tests passed\u001b[0m")
+    print("├────────────────────────────────────────────────────")
+    print("│ SUMMARY")
+    print("├────────────────────────────────────────────────────")
+    print("│  " + str(total) + " tests run")
+    print("│  \u001b[32m" + str(passed) + " tests passed\u001b[0m")
     if failed > 0:
-        print(" \u001b[31m" + str(failed) + " tests failed\u001b[0m")
+        print("│  \u001b[31m" + str(failed) + " tests failed\u001b[0m")
     else:
-        print(" \u001b[90m" + str(failed) + " tests failed\u001b[0m")
+        print("│  \u001b[90m" + str(failed) + " tests failed\u001b[0m")
 
     if failed == 0:
-        print("\n \u001b[1m\u001b[32mAll tests passed\u001b[0m")
+        print("│\n│ \u001b[1m\u001b[32mAll tests passed\u001b[0m")
 
     if errors.size() > 0:
-        print("\n \u001b[1m\u001b[31m" + str(errors.size()) + " Error(s) were encountered:\u001b[0m")
+        print("│\n│ \u001b[1m\u001b[31m" + str(errors.size()) + " Error(s) were encountered:\u001b[0m")
         for error in errors:
-            print(" " + error)
+            print("│ " + error)
 
-    print("────────────────────────────")
+    print("└────────────────────────────────────────────────────")
 
 
 ## Exit the process safely, waiting for a frame to ensure all print statements are flushed (still required?)
