@@ -143,10 +143,37 @@ func print_summary() -> void:
             passed += 1
     var failed := total - passed
 
+    # Group test results by file name
+    var test_files_groups: Dictionary = {}
+
+    for result in test_results:
+        if not test_files_groups.has(result.file_name):
+            print("[Debug] Adding file " + result.file_name + " to test_files_groups")
+            test_files_groups[result.file_name] = []
+        test_files_groups[result.file_name].append(result)
+
     print("")  # spacer line
     print("────────────────────────────")
     print(" RESULTS")
     print("────────────────────────────")
+
+    # Print per-file aggregate results
+    for file_name in test_files:
+        var file_passed := 0
+        var file_failed := 0
+        if test_files_groups.has(file_name):
+            for result in test_files_groups[file_name]:
+                if result.passed:
+                    file_passed += 1
+                else:
+                    file_failed += 1
+            var base_color := "\u001b[32m" if file_passed > 0 and file_failed == 0 else "\u001b[31m"
+            print(" - " + base_color + file_name + " (" + str(file_passed) + " passed, " + str(file_failed) + " failed)\u001b[0m")
+        else:
+            print(" - " + "\u001b[33m" + file_name + " (skipped)\u001b[0m")
+
+    print("────────────────────────────")
+    print("SUMMARY:")
     print(" " + str(total) + " tests run")
     print(" \u001b[32m" + str(passed) + " tests passed\u001b[0m")
     if failed > 0:
@@ -158,7 +185,7 @@ func print_summary() -> void:
         print("\n \u001b[1m\u001b[32mAll tests passed\u001b[0m")
 
     if errors.size() > 0:
-        print("\n \u001b[1m\u001b[31mErrors were encountered:\u001b[0m")
+        print("\n \u001b[1m\u001b[31m" + str(errors.size()) + " Error(s) were encountered:\u001b[0m")
         for error in errors:
             print(" " + error)
 

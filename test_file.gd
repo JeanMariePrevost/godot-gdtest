@@ -326,27 +326,45 @@ func assert_type_name(value: Variant, expected_type_name: String, error_message:
 # ------------------ Helper functions
 
 
+## Helper to create a standardized test result object
 func _create_test_result(test_passed: bool, error_message: String) -> TestResult:
-    ## Helper to create a standardized test result object
-    var stack: Array[Dictionary] = get_stack()
-    var caller: Dictionary = stack[1] if stack.size() > 1 else {} as Dictionary
-    # TODO: Dynamically look up the stack 2-5 times trying to "exit TestUtils" instead of a hardcoded index
+    var caller: Dictionary = find_caller_frame()
     var test_result: TestResult = TestResult.new(
         test_passed, error_message, caller.get("function", "<unknown>"), _extract_file_name(caller.get("source", "<unknown>")), caller.get("line", 0)
     )
     return test_result
 
 
+## Find the first non-internal stack frame (outside the test utilities)
+## Used to get the file name and line number of the test that failed, where the test actually lives
+static func find_caller_frame() -> Dictionary:
+    var stack: Array[Dictionary] = get_stack()
+    var skip_prefixes: Array[String] = ["res://utils/test_result.gd", "res://utils/test_file.gd"]
+
+    for frame in stack:
+        var source: String = frame.get("source", "")
+        var is_internal := false
+        for prefix in skip_prefixes:
+            if source.begins_with(prefix):
+                is_internal = true
+                break
+        if not is_internal:
+            return frame
+
+    # fallback if nothing found
+    return stack[0] if stack.size() > 0 else {}
+
+
+## Extract the file name portion from a path
 func _extract_file_name(path: String) -> String:
-    ## Extract the file name portion from a path
     if path == "<unknown>":
         return path
     return path.get_file()
 
 
+## Helper to check if any common collection type contains an item
+## Works for arrays, dictionaries, strings, and objects that implement a "has" method
 func _contains(container: Variant, item: Variant) -> bool:
-    ## Helper to check if any common collection type contains an item
-    ## Works for arrays, dictionaries, strings, and objects that implement a "has" method
     if container == null:
         return false
 
