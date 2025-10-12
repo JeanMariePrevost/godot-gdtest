@@ -111,10 +111,10 @@ func _run_single_test(instance: Object, file_name: String, method_name: String) 
         return TestUtils.fail_test("Incorrect test result format for: " + file_name + "::" + method_name + " (Did you use TestUtils.create_test_result?)")
 
     # DEBUG, wait between tests to see the progression better
-    OS.delay_msec(20)
+    OS.delay_msec(3)
 
     # Display success/failure inline by overwriting the initial status
-    var ok: bool = result.get("status", false)
+    var ok: bool = result.get("passed", false)
     var msg: String = result.get("message", "")
     if ok:
         printraw("\u001b[2K\r > " + file_name + "::" + method_name + " \u001b[32m(passed)\u001b[0m")  # \u001b[2K\r is to clear the line and move to the start of the line, \u001b[32m makes "Passed" green, \u001b[0m resets color
@@ -131,7 +131,7 @@ func print_summary() -> void:
     var total := test_results.size()
     var passed := 0
     for result in test_results:
-        if result.get("status", false):
+        if result.get("passed", false):
             passed += 1
     var failed := total - passed
 
