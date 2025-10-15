@@ -348,7 +348,6 @@ static func find_caller_frame() -> Dictionary:
         var frame: Dictionary = stack[i]
         var source: String = frame.get("source", "")
         var is_internal := false
-        print("Checking source: ", source, " against pattern: ", pattern_of_levels_to_skip, " match: ", source.match(pattern_of_levels_to_skip))
         if source.match(pattern_of_levels_to_skip):
             is_internal = true
         if not is_internal:
