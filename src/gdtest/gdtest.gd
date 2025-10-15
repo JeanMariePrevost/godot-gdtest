@@ -14,7 +14,7 @@ extends SceneTree
 
 const TESTS_PATH: String = "res://tests"
 var test_files: Array[String] = []
-var test_results: Array[TestResult] = []
+var test_results: Array[GDTestResult] = []
 var errors: Array[String] = []
 var tests_functions_processed: int = 0
 
@@ -95,8 +95,8 @@ func _run_test_file(file: String) -> void:
         errors.append("[Error] Failed to instantiate script: " + path)
         return
 
-    if not test_file_instance is TestFile:
-        errors.append("[Error] Script at " + path + " does not inherit from TestFile and was ignored.")
+    if not test_file_instance is GDTestCase:
+        errors.append("[Error] Script at " + path + " does not inherit from GDTestCase and was ignored.")
         return
 
     var methods: Array[Dictionary] = test_file_instance.get_method_list()
@@ -105,23 +105,23 @@ func _run_test_file(file: String) -> void:
         if not m.name.begins_with("test_"):
             continue
         tests_functions_processed += 1
-        var result: TestResult = await _run_single_test(test_file_instance, file, m.name)
+        var result: GDTestResult = await _run_single_test(test_file_instance, file, m.name)
         test_results.append(result)
 
 
 ## Execute a single test method and return the result
-func _run_single_test(instance: TestFile, file_name: String, method_name: String) -> TestResult:
+func _run_single_test(instance: GDTestCase, file_name: String, method_name: String) -> GDTestResult:
     # Print initial status with printraw to allow overwriting it later
     printraw(" > " + file_name + "::" + method_name + " \u001b[90m(running)\u001b[0m")
 
     # Ensure the method exists before calling
     if not instance.has_method(method_name):
         push_error("[Error] Missing method: " + method_name)
-        return TestResult.new(false, "Missing method: " + method_name, file_name, method_name, 0)
+        return GDTestResult.new(false, "Missing method: " + method_name, file_name, method_name, 0)
 
     var result = instance.call(method_name)
 
-    if result is not TestResult:
+    if result is not GDTestResult:
         result = await result  # This will be a GDScriptFunctionState instance, meaning the tests is async and must be awaited
 
     # DEBUG, wait between tests to see the progression better
@@ -130,7 +130,7 @@ func _run_single_test(instance: TestFile, file_name: String, method_name: String
     # Display success/failure inline by overwriting the initial status
     if result == null:
         errors.append("[Error] Test result is null for " + file_name + "::" + method_name + ". Did the test fail mid-execution?")
-        return TestResult.new(false, "Test failed to return a result", file_name, method_name, 0)
+        return GDTestResult.new(false, "Test failed to return a result", file_name, method_name, 0)
     if result.passed:
         printraw("\u001b[2K\r > " + file_name + "::" + method_name + " \u001b[32m(passed)\u001b[0m")  # \u001b[2K\r is to clear the line and move to the start of the line, \u001b[32m makes "Passed" green, \u001b[0m resets color
     else:

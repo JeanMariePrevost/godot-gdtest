@@ -5,7 +5,7 @@
       "label": "Run Godot Tests",
       "type": "shell",
       "command": "${config:godotTools.editorPath.godot4}",
-      "args": ["--headless", "-s", "res://src/gdtest/test_runner_tree.gd"],
+      "args": ["--headless", "-s", "res://src/gdtest/gdtest.gd"],
       "group": {
         "kind": "test",
         "isDefault": true

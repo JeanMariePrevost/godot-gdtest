@@ -1,7 +1,7 @@
 ## Class to store the result of a test
 
 extends RefCounted
-class_name TestResult
+class_name GDTestResult
 
 var passed: bool
 var error_message: String
@@ -20,7 +20,7 @@ func _init(_passed: bool, _error_message: String, _function_name: String, _file_
 
 func _to_string() -> String:
     return (
-        "TestResult(passed="
+        "GDTestResult(passed="
         + str(passed)
         + ", error_message="
         + error_message

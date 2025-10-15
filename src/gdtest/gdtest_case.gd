@@ -1,7 +1,7 @@
 ## The base class for any test file
 
 extends RefCounted
-class_name TestFile
+class_name GDTestCase
 
 
 ## Get the file name of the test file
@@ -9,14 +9,14 @@ func get_file_name() -> String:
     return _extract_file_name(get_script().resource_path)
 
 
-func pass_test() -> TestResult:
+func pass_test() -> GDTestResult:
     ## Manually pass a test
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.pass_test()
     return _create_test_result(true, "")
 
 
-func fail_test(error_message: String = "") -> TestResult:
+func fail_test(error_message: String = "") -> GDTestResult:
     ## Manually fail a test
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.fail_test()
@@ -25,7 +25,7 @@ func fail_test(error_message: String = "") -> TestResult:
     return _create_test_result(false, error_message)
 
 
-func assert_true(condition: bool, error_message: String = "") -> TestResult:
+func assert_true(condition: bool, error_message: String = "") -> GDTestResult:
     ## Assert that a condition is true
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_true(a+b >= c)
@@ -34,7 +34,7 @@ func assert_true(condition: bool, error_message: String = "") -> TestResult:
     return _create_test_result(condition, error_message)
 
 
-func assert_false(condition: bool, error_message: String = "") -> TestResult:
+func assert_false(condition: bool, error_message: String = "") -> GDTestResult:
     ## Assert that a condition is false
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_false(a+b == c)
@@ -43,7 +43,7 @@ func assert_false(condition: bool, error_message: String = "") -> TestResult:
     return _create_test_result(not condition, error_message)
 
 
-func assert_equal(expected: Variant, actual: Variant, error_message: String = "") -> TestResult:
+func assert_equal(expected: Variant, actual: Variant, error_message: String = "") -> GDTestResult:
     ## Assert that two values are equal using the "==" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_equal(a+b, c)
@@ -52,7 +52,7 @@ func assert_equal(expected: Variant, actual: Variant, error_message: String = ""
     return _create_test_result(expected == actual, error_message)
 
 
-func assert_equal_almost(expected: Variant, actual: Variant, tolerance: float, error_message: String = "") -> TestResult:
+func assert_equal_almost(expected: Variant, actual: Variant, tolerance: float, error_message: String = "") -> GDTestResult:
     ## Assert that two values are approximately equal within a tolerance
     ## Handles numeric types (int, float) and vector types (Vector2, Vector3, Vector4)
     ## Use at the end of a test by returning the result, e.g.
@@ -88,7 +88,7 @@ func assert_equal_almost(expected: Variant, actual: Variant, tolerance: float, e
     return _create_test_result(result, error_message)
 
 
-func assert_not_equal(expected: Variant, actual: Variant, error_message: String = "") -> TestResult:
+func assert_not_equal(expected: Variant, actual: Variant, error_message: String = "") -> GDTestResult:
     ## Assert that two values are not equal using the "!=" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_not_equal(a+b, c)
@@ -97,7 +97,7 @@ func assert_not_equal(expected: Variant, actual: Variant, error_message: String 
     return _create_test_result(expected != actual, error_message)
 
 
-func assert_not_equal_almost(expected: Variant, actual: Variant, tolerance: float = 0.0001, error_message: String = "") -> TestResult:
+func assert_not_equal_almost(expected: Variant, actual: Variant, tolerance: float = 0.0001, error_message: String = "") -> GDTestResult:
     ## Assert that two values are not approximately equal within a tolerance
     ## Handles numeric types (int, float) and vector types (Vector2, Vector3, Vector4)
     ## Use at the end of a test by returning the result, e.g.
@@ -133,7 +133,7 @@ func assert_not_equal_almost(expected: Variant, actual: Variant, tolerance: floa
     return _create_test_result(result, error_message)
 
 
-func assert_greater_than(a: Variant, b: Variant, error_message: String = "") -> TestResult:
+func assert_greater_than(a: Variant, b: Variant, error_message: String = "") -> GDTestResult:
     ## Assert that a is greater than b using the ">" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_greater_than(a, b)
@@ -142,7 +142,7 @@ func assert_greater_than(a: Variant, b: Variant, error_message: String = "") -> 
     return _create_test_result(a > b, error_message)
 
 
-func assert_greater_than_or_equal(a: Variant, b: Variant, error_message: String = "") -> TestResult:
+func assert_greater_than_or_equal(a: Variant, b: Variant, error_message: String = "") -> GDTestResult:
     ## Assert that a is greater than or equal to b using the ">=" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_greater_than_or_equal(a, b)
@@ -151,7 +151,7 @@ func assert_greater_than_or_equal(a: Variant, b: Variant, error_message: String 
     return _create_test_result(a >= b, error_message)
 
 
-func assert_less_than(a: Variant, b: Variant, error_message: String = "") -> TestResult:
+func assert_less_than(a: Variant, b: Variant, error_message: String = "") -> GDTestResult:
     ## Assert that a is less than b using the "<" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_less_than(a, b)
@@ -160,7 +160,7 @@ func assert_less_than(a: Variant, b: Variant, error_message: String = "") -> Tes
     return _create_test_result(a < b, error_message)
 
 
-func assert_less_than_or_equal(a: Variant, b: Variant, error_message: String = "") -> TestResult:
+func assert_less_than_or_equal(a: Variant, b: Variant, error_message: String = "") -> GDTestResult:
     ## Assert that a is less than or equal to b using the "<=" operator
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_less_than_equal(a, b)
@@ -169,7 +169,7 @@ func assert_less_than_or_equal(a: Variant, b: Variant, error_message: String = "
     return _create_test_result(a <= b, error_message)
 
 
-func assert_null(value: Variant, error_message: String = "") -> TestResult:
+func assert_null(value: Variant, error_message: String = "") -> GDTestResult:
     ## Assert that a value is null
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_null(some_value)
@@ -178,7 +178,7 @@ func assert_null(value: Variant, error_message: String = "") -> TestResult:
     return _create_test_result(value == null, error_message)
 
 
-func assert_not_null(value: Variant, error_message: String = "") -> TestResult:
+func assert_not_null(value: Variant, error_message: String = "") -> GDTestResult:
     ## Assert that a value is not null
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_not_null(some_value)
@@ -187,7 +187,7 @@ func assert_not_null(value: Variant, error_message: String = "") -> TestResult:
     return _create_test_result(value != null, error_message)
 
 
-func assert_has_method(value: Variant, method_name: String, error_message: String = "") -> TestResult:
+func assert_has_method(value: Variant, method_name: String, error_message: String = "") -> GDTestResult:
     ## Assert that a value has a method
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_has_method(some_value, "some_method")
@@ -196,7 +196,7 @@ func assert_has_method(value: Variant, method_name: String, error_message: Strin
     return _create_test_result(value.has_method(method_name), error_message)
 
 
-func assert_not_has_method(value: Variant, method_name: String, error_message: String = "") -> TestResult:
+func assert_not_has_method(value: Variant, method_name: String, error_message: String = "") -> GDTestResult:
     ## Assert that a value does not have a method
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_not_has_method(some_value, "some_method")
@@ -205,7 +205,7 @@ func assert_not_has_method(value: Variant, method_name: String, error_message: S
     return _create_test_result(not value.has_method(method_name), error_message)
 
 
-func assert_has_property(value: Variant, property_name: String, error_message: String = "") -> TestResult:
+func assert_has_property(value: Variant, property_name: String, error_message: String = "") -> GDTestResult:
     ## Assert that a value has a property
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_has_property(some_value, "some_property")
@@ -214,7 +214,7 @@ func assert_has_property(value: Variant, property_name: String, error_message: S
     return _create_test_result(value.has_property(property_name), error_message)
 
 
-func assert_not_has_property(value: Variant, property_name: String, error_message: String = "") -> TestResult:
+func assert_not_has_property(value: Variant, property_name: String, error_message: String = "") -> GDTestResult:
     ## Assert that a value does not have a property
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_not_has_property(some_value, "some_property")
@@ -223,7 +223,7 @@ func assert_not_has_property(value: Variant, property_name: String, error_messag
     return _create_test_result(not value.has_property(property_name), error_message)
 
 
-func assert_contains(container: Variant, item: Variant, error_message: String = "") -> TestResult:
+func assert_contains(container: Variant, item: Variant, error_message: String = "") -> GDTestResult:
     ## Assert that a collection/object contains an item
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_contains(some_array, item)
@@ -233,14 +233,14 @@ func assert_contains(container: Variant, item: Variant, error_message: String = 
     return _create_test_result(result, error_message)
 
 
-func assert_not_contains(container: Variant, item: Variant, error_message: String = "") -> TestResult:
+func assert_not_contains(container: Variant, item: Variant, error_message: String = "") -> GDTestResult:
     var result := _contains(container, item)
     if error_message == "":
         error_message = "Expected " + str(container) + " to not contain " + str(item)
     return _create_test_result(not result, error_message)
 
 
-func assert_contains_all(container: Variant, items: Array[Variant], error_message: String = "") -> TestResult:
+func assert_contains_all(container: Variant, items: Array[Variant], error_message: String = "") -> GDTestResult:
     ## Assert that a container contains all items in an array
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_contains_all(some_array, [item1, item2, item3])
@@ -259,7 +259,7 @@ func assert_contains_all(container: Variant, items: Array[Variant], error_messag
     return _create_test_result(true, "")
 
 
-func assert_contains_none(container: Variant, items: Array[Variant], error_message: String = "") -> TestResult:
+func assert_contains_none(container: Variant, items: Array[Variant], error_message: String = "") -> GDTestResult:
     ## Assert that a container does not contain any items in an array
     ## Use at the end of a test by returning the result, e.g.
     ##     return TestUtils.assert_contains_none(some_array, [item1, item2, item3])
@@ -272,7 +272,7 @@ func assert_contains_none(container: Variant, items: Array[Variant], error_messa
     return _create_test_result(true, "")
 
 
-func assert_type_name(value: Variant, expected_type_name: String, error_message: String = "") -> TestResult:
+func assert_type_name(value: Variant, expected_type_name: String, error_message: String = "") -> GDTestResult:
     ## Assert that a value matches the given type or class name.
     ##
     ## Works for both built-in types (e.g. "int", "Array") and custom classes.
@@ -332,9 +332,9 @@ func assert_type_name(value: Variant, expected_type_name: String, error_message:
 
 
 ## Helper to create a standardized test result object
-func _create_test_result(test_passed: bool, error_message: String) -> TestResult:
+func _create_test_result(test_passed: bool, error_message: String) -> GDTestResult:
     var caller: Dictionary = find_caller_frame()
-    var test_result: TestResult = TestResult.new(test_passed, error_message, caller.get("function", "<unknown>"), get_file_name(), caller.get("line", 0))
+    var test_result: GDTestResult = GDTestResult.new(test_passed, error_message, caller.get("function", "<unknown>"), get_file_name(), caller.get("line", 0))
     return test_result
 
 
