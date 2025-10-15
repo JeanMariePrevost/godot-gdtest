@@ -26,7 +26,7 @@ Perfect for quickly running tests from CLI without needing any setup in the edit
 
 
 1. Copy the `gdtest/` folder anywhere in your project (e.g. under `res://src/gdtest/`).
-2. Create your tests files and test logic. Each test file must:
+2. Create your tests files and test logic ([see example below](#test-case-file-example)). Each test file must:
    - Be located at `res://tests/` (by default, can be changed in `gdtest.gd`).
    - Use the `.gd` extension  
    - Extend `GDTestCase`  
@@ -48,6 +48,8 @@ Or you can use absolute paths like:
 ```bash
 & "D:\Path_to_Godot_Binaries\Godot_v4.5-stable_mono_win64\Godot_v4.5-stable_mono_win64.exe" --headless -s res://src/gdtest/gdtest.gd
 ```
+
+#### Test Case File Example
 
 Below is an example of a few simple tests in a valid test case file, which would have to be placed for example at `[project root]/tests/my_demo_test_file.gd`:
 
