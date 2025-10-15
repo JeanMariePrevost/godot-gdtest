@@ -52,7 +52,7 @@ func assert_equal(expected: Variant, actual: Variant, error_message: String = ""
     return _create_test_result(expected == actual, error_message)
 
 
-func assert_equal_almost(expected: Variant, actual: Variant, tolerance: float, error_message: String = "") -> GDTestResult:
+func assert_equal_almost(expected: Variant, actual: Variant, tolerance: float = 0.00001, error_message: String = "") -> GDTestResult:
     ## Assert that two values are approximately equal within a tolerance
     ## Handles numeric types (int, float) and vector types (Vector2, Vector3, Vector4)
     ## Use at the end of a test by returning the result, e.g.
@@ -97,7 +97,7 @@ func assert_not_equal(expected: Variant, actual: Variant, error_message: String 
     return _create_test_result(expected != actual, error_message)
 
 
-func assert_not_equal_almost(expected: Variant, actual: Variant, tolerance: float = 0.0001, error_message: String = "") -> GDTestResult:
+func assert_not_equal_almost(expected: Variant, actual: Variant, tolerance: float = 0.00001, error_message: String = "") -> GDTestResult:
     ## Assert that two values are not approximately equal within a tolerance
     ## Handles numeric types (int, float) and vector types (Vector2, Vector3, Vector4)
     ## Use at the end of a test by returning the result, e.g.
