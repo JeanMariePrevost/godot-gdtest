@@ -5,7 +5,9 @@ It discovers and executes test scripts automatically in headless mode, providing
 
 Perfect for quickly running tests from CLI without needing any setup in the editor.
 
-![alt text](images/gdtest_output_preview.png)
+![alt text](images/gdtest_summary_all_passed.png)
+
+![alt text](images/gdtest_summary_with_failures.png)
 
 
 ---
