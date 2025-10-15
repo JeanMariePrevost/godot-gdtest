@@ -28,7 +28,7 @@ func _initialize():
         return
 
     _discover_test_files()
-    _run_all_tests()
+    await _run_all_tests()
     print_summary()
     exit_safely()
 
@@ -73,7 +73,7 @@ func _discover_test_files() -> void:
 ## Run all the test files in the test_files array
 func _run_all_tests() -> void:
     for file: String in test_files:
-        _run_test_file(file)
+        await _run_test_file(file)
 
 
 ## Loads and validates a test file, then runs all the tests inside it
@@ -105,7 +105,7 @@ func _run_test_file(file: String) -> void:
         if not m.name.begins_with("test_"):
             continue
         tests_functions_processed += 1
-        var result: TestResult = _run_single_test(test_file_instance, file, m.name)
+        var result: TestResult = await _run_single_test(test_file_instance, file, m.name)
         test_results.append(result)
 
 
@@ -119,12 +119,18 @@ func _run_single_test(instance: TestFile, file_name: String, method_name: String
         push_error("[Error] Missing method: " + method_name)
         return TestResult.new(false, "Missing method: " + method_name, file_name, method_name, 0)
 
-    var result: TestResult = instance.call(method_name)
+    var result = instance.call(method_name)
+
+    if result is not TestResult:
+        result = await result  # This will be a GDScriptFunctionState instance, meaning the tests is async and must be awaited
 
     # DEBUG, wait between tests to see the progression better
     OS.delay_msec(3)
 
     # Display success/failure inline by overwriting the initial status
+    if result == null:
+        errors.append("[Error] Test result is null for " + file_name + "::" + method_name + ". Did the test fail mid-execution?")
+        return TestResult.new(false, "Test failed to return a result", file_name, method_name, 0)
     if result.passed:
         printraw("\u001b[2K\r > " + file_name + "::" + method_name + " \u001b[32m(passed)\u001b[0m")  # \u001b[2K\r is to clear the line and move to the start of the line, \u001b[32m makes "Passed" green, \u001b[0m resets color
     else:
@@ -140,10 +146,15 @@ func _run_single_test(instance: TestFile, file_name: String, method_name: String
 func print_summary() -> void:
     var total := test_results.size()
     var passed := 0
+    var failed := 0
     for result in test_results:
         if result.passed:
             passed += 1
-    var failed := total - passed
+        else:
+            failed += 1
+
+    if failed + passed != total:
+        errors.append("[Error] Test results do not add up. Some tests propbably failed to run.")
 
     # Group test results by file name
     var test_files_groups: Dictionary = {}
@@ -194,12 +205,13 @@ func print_summary() -> void:
     if errors.size() > 0:
         print("│\n│ \u001b[1m\u001b[31m" + str(errors.size()) + " Error(s) were encountered:\u001b[0m")
         for error in errors:
-            print("│ " + error)
+            print("│ \u001b[33m" + error + "\u001b[0m")
 
     print("└────────────────────────────────────────────────────")
 
 
 ## Exit the process safely, waiting for a frame to ensure all print statements are flushed (still required?)
 func exit_safely() -> void:
+    await process_frame
     await process_frame
     quit(0)
