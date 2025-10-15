@@ -4,6 +4,11 @@ extends RefCounted
 class_name TestFile
 
 
+## Get the file name of the test file
+func get_file_name() -> String:
+    return _extract_file_name(get_script().resource_path)
+
+
 func pass_test() -> TestResult:
     ## Manually pass a test
     ## Use at the end of a test by returning the result, e.g.
@@ -329,9 +334,7 @@ func assert_type_name(value: Variant, expected_type_name: String, error_message:
 ## Helper to create a standardized test result object
 func _create_test_result(test_passed: bool, error_message: String) -> TestResult:
     var caller: Dictionary = find_caller_frame()
-    var test_result: TestResult = TestResult.new(
-        test_passed, error_message, caller.get("function", "<unknown>"), _extract_file_name(caller.get("source", "<unknown>")), caller.get("line", 0)
-    )
+    var test_result: TestResult = TestResult.new(test_passed, error_message, caller.get("function", "<unknown>"), get_file_name(), caller.get("line", 0))
     return test_result
 
 
@@ -339,17 +342,20 @@ func _create_test_result(test_passed: bool, error_message: String) -> TestResult
 ## Used to get the file name and line number of the test that failed, where the test actually lives
 static func find_caller_frame() -> Dictionary:
     var stack: Array[Dictionary] = get_stack()
-    var skip_prefixes: Array[String] = ["res://utils/test_result.gd", "res://utils/test_file.gd"]
+    var patterns_of_levels_to_skip: Array[String] = ["^res://.*gdtest/test_result\\.gd", "^res://.*gdtest/test_file\\.gd"]
 
-    for frame in stack:
-        var source: String = frame.get("source", "")
-        var is_internal := false
-        for prefix in skip_prefixes:
-            if source.begins_with(prefix):
-                is_internal = true
-                break
-        if not is_internal:
-            return frame
+    # Skip the first frame (this helper function itself)
+    if stack.size() > 1:
+        for i in range(1, stack.size()):
+            var frame: Dictionary = stack[i]
+            var source: String = frame.get("source", "")
+            var is_internal := false
+            for pattern in patterns_of_levels_to_skip:
+                if source.find(pattern) != -1:
+                    is_internal = true
+                    break
+            if not is_internal:
+                return frame
 
     # fallback if nothing found
     return stack[0] if stack.size() > 0 else {}
