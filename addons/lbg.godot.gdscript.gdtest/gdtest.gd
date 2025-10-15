@@ -13,15 +13,33 @@
 extends SceneTree
 
 const TESTS_PATH: String = "res://tests"
+const LOG_EXLUDED_FILES: bool = true
+const LOG_EXLUDED_METHODS: bool = true
 var test_files: Array[String] = []
+var test_files_excluded_by_pattern: Array[String] = []
+var test_methods_excluded_by_pattern: Array[String] = []
 var test_results: Array[GDTestResult] = []
 var errors: Array[String] = []
 var tests_functions_processed: int = 0
+
+## Launch argument to determine what files can get included during discovery, "glob" pattern (* = any string, ? = any single character)
+var whitelist_file_pattern: String = ""
+
+## Launch argument to determine what files can get excluded during discovery, "glob" pattern (* = any string, ? = any single character)
+var blacklist_file_pattern: String = ""
+
+## Launch argument to determine what methods can get included during discovery, "glob" pattern (* = any string, ? = any single character)
+var whitelist_method_pattern: String = ""
+
+## Launch argument to determine what methods can get excluded during discovery, "glob" pattern (* = any string, ? = any single character)
+var blacklist_method_pattern: String = ""
 
 
 ## Entrypoint for the whole process, automatically called when making this the SceneTree.
 func _initialize():
     print("[ Test Runner Starting ]")
+
+    _extract_launch_arguments()
 
     if not _validate_test_directory():
         quit(1)
@@ -31,6 +49,57 @@ func _initialize():
     await _run_all_tests()
     print_summary()
     exit_safely()
+
+
+## Extarct the values from the launch arguments
+func _extract_launch_arguments() -> void:
+    # DEBUG: Print the launch argument as is
+    # print("Launch arguments: " + str(OS.get_cmdline_args()))
+
+    var arguments = {}
+    for argument in OS.get_cmdline_args():
+        if argument.contains("="):
+            var key_value = argument.split("=")
+            arguments[key_value[0].trim_prefix("--")] = key_value[1]
+        else:
+            # Options without an argument will be present in the dictionary,
+            # with the value set to an empty string.
+            arguments[argument.trim_prefix("--")] = ""
+
+    # Erase the expected default ones, "-s" and the first one to end with "lbg.godot.gdscript.gdtest/gdtest.gd"
+    arguments.erase("-s")
+    for key in arguments.keys():
+        if key.ends_with("lbg.godot.gdscript.gdtest/gdtest.gd"):
+            arguments.erase(key)
+            break
+
+    # Extract the arguments
+    # Example covering all the possibilities:
+    # godot4 --headless -s res://addons/lbg.godot.gdscript.gdtest/gdtest.gd include="include this file" --exclude="exclude this file" include-method="include this method" --exclude-method="exclude this method"
+    # Example of excluding a simple pattern (no need for quotes if no special characters/spaces)
+    # godot4 --headless -s res://addons/lbg.godot.gdscript.gdtest/gdtest.gd --exclude-method=.*enemy.*
+    whitelist_file_pattern = arguments.get("include", "")
+    arguments.erase("include")
+    blacklist_file_pattern = arguments.get("exclude", "")
+    arguments.erase("exclude")
+    whitelist_method_pattern = arguments.get("include-method", "")
+    arguments.erase("include-method")
+    blacklist_method_pattern = arguments.get("exclude-method", "")
+    arguments.erase("exclude-method")
+
+    # Print the extracted arguments
+    if whitelist_file_pattern != "" or blacklist_file_pattern != "" or whitelist_method_pattern != "" or blacklist_method_pattern != "":
+        print("Extracted arguments:")
+        print("  \u001b[36minclude:\u001b[0m " + whitelist_file_pattern)  # Whitelisting of files
+        print("  \u001b[36mexclude:\u001b[0m " + blacklist_file_pattern)  # Blacklisting of files
+        print("  \u001b[36minclude-method:\u001b[0m " + whitelist_method_pattern)  # Whitelisting of methods
+        print("  \u001b[36mexclude-method:\u001b[0m " + blacklist_method_pattern)  # Blacklisting of methods
+
+    # Print the unknown arguments
+    if not arguments.is_empty():
+        print("\u001b[33mUnknown arguments:\u001b[0m")
+        for key in arguments:
+            print("  \u001b[33m" + key + ': "' + str(arguments[key]) + '"\u001b[0m"')
 
 
 ## Ensures the tests directory is valid and can be opened
@@ -60,9 +129,17 @@ func _discover_test_files() -> void:
 
     for file: String in dir.get_files():
         if file.ends_with(".gd"):
+            if blacklist_file_pattern != "" and file.match(blacklist_file_pattern):
+                if LOG_EXLUDED_FILES:
+                    print("\u001b[33mFile excluded:\u001b[0m " + file + " \u001b[90m(matches blacklist)\u001b[0m")
+                test_files_excluded_by_pattern.append(file)
+                continue
+            if whitelist_file_pattern != "" and not file.match(whitelist_file_pattern):
+                if LOG_EXLUDED_FILES:
+                    print("\u001b[33mFile excluded:\u001b[0m " + file + " \u001b[90m(does not match whitelist)\u001b[0m")
+                test_files_excluded_by_pattern.append(file)
+                continue
             test_files.append(file)
-        # else:
-        #     print("[Info] Ignored non-GDScript file:", file)
 
     if test_files.is_empty():
         push_warning("[Warning] No .gd test files found in " + TESTS_PATH)
@@ -103,6 +180,16 @@ func _run_test_file(file: String) -> void:
 
     for m in methods:
         if not m.name.begins_with("test_"):
+            continue
+        if blacklist_method_pattern != "" and m.name.match(blacklist_method_pattern):
+            if LOG_EXLUDED_METHODS:
+                print("\u001b[33mSkipped:\u001b[0m " + file + "::" + m.name + " \u001b[90m(matches blacklist)\u001b[0m")
+            test_methods_excluded_by_pattern.append(file + "::" + m.name)
+            continue
+        if whitelist_method_pattern != "" and not m.name.match(whitelist_method_pattern):
+            if LOG_EXLUDED_METHODS:
+                print("\u001b[33mSkipped:\u001b[0m " + file + "::" + m.name + " \u001b[90m(does not match whitelist)\u001b[0m")
+            test_methods_excluded_by_pattern.append(file + "::" + m.name)
             continue
         tests_functions_processed += 1
         var result: GDTestResult = await _run_single_test(test_file_instance, file, m.name)
@@ -199,8 +286,17 @@ func print_summary() -> void:
     else:
         print("│  \u001b[90m" + str(failed) + " tests failed\u001b[0m")
 
+    print("│")
+
+    if test_files_excluded_by_pattern.size() > 0:
+        print("│  \u001b[90m(" + str(test_files_excluded_by_pattern.size()) + " test file(s) filtered out by command-line arguments)\u001b[0m")
+    if test_methods_excluded_by_pattern.size() > 0:
+        print("│  \u001b[90m(" + str(test_methods_excluded_by_pattern.size()) + " test(s) filtered out by command-line arguments)\u001b[0m")
+    if test_files_excluded_by_pattern.size() > 0 or test_methods_excluded_by_pattern.size() > 0:
+        print("│")
+
     if failed == 0:
-        print("│\n│ \u001b[1m\u001b[32mAll tests passed\u001b[0m")
+        print("│ \u001b[1m\u001b[32mAll tests passed\u001b[0m")
 
     if errors.size() > 0:
         print("│\n│ \u001b[1m\u001b[31m" + str(errors.size()) + " Error(s) were encountered:\u001b[0m")
