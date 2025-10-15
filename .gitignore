@@ -47,3 +47,8 @@ export_presets.cfg
 # Specific files
 TODO.md
 **/scracth_pad.gd
+
+
+# Re-introductions
+!/images/
+!/images/*
