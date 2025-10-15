@@ -1,13 +1,15 @@
 # GDTest - Lightweight GDScript Test Runner for Godot 4
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) [![Godot 4.5+](https://img.shields.io/badge/Godot-4.5%2B-blue.svg)](https://godotengine.org/) [![Language: GDScript](https://img.shields.io/badge/Language-GDScript-478CBF.svg)](https://docs.godotengine.org/en/stable/) [![Status: WIP](https://img.shields.io/badge/Status-Work%20in%20Progress-orange.svg)](#development-status)
+
 
 GDTest is a minimal, script-based test runner for GDScript projects.  
 It discovers and executes test scripts automatically in headless mode, providing simple async support, built-in assertions, and clear error reporting.
 
 Perfect for quickly running tests from CLI without needing any setup in the editor.
 
-![alt text](images/gdtest_summary_all_passed.png)
+![Test Summary - All Tests Passed](images/gdtest_summary_all_passed.png)
 
-![alt text](images/gdtest_summary_with_failures.png)
+![Test Summary - With Test Failures](images/gdtest_summary_with_failures.png)
 
 
 ---
