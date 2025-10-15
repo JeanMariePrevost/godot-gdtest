@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Godot Tests",
+      "type": "shell",
+      "command": "${config:godotTools.editorPath.godot4}",
+      "args": ["--headless", "-s", "res://src/test_runner_tree.gd"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "Run Godot tests using the test runner"
+    }
+  ]
+}
