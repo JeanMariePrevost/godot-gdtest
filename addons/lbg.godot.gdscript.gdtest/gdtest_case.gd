@@ -342,20 +342,17 @@ func _create_test_result(test_passed: bool, error_message: String) -> GDTestResu
 ## Used to get the file name and line number of the test that failed, where the test actually lives
 static func find_caller_frame() -> Dictionary:
     var stack: Array[Dictionary] = get_stack()
-    var patterns_of_levels_to_skip: Array[String] = ["^res://.*gdtest/test_result\\.gd", "^res://.*gdtest/test_file\\.gd"]
+    var pattern_of_levels_to_skip: String = "*gdtest/gdtest*"  # "glob", not a regex
 
-    # Skip the first frame (this helper function itself)
-    if stack.size() > 1:
-        for i in range(1, stack.size()):
-            var frame: Dictionary = stack[i]
-            var source: String = frame.get("source", "")
-            var is_internal := false
-            for pattern in patterns_of_levels_to_skip:
-                if source.find(pattern) != -1:
-                    is_internal = true
-                    break
-            if not is_internal:
-                return frame
+    for i in stack.size():
+        var frame: Dictionary = stack[i]
+        var source: String = frame.get("source", "")
+        var is_internal := false
+        print("Checking source: ", source, " against pattern: ", pattern_of_levels_to_skip, " match: ", source.match(pattern_of_levels_to_skip))
+        if source.match(pattern_of_levels_to_skip):
+            is_internal = true
+        if not is_internal:
+            return frame
 
     # fallback if nothing found
     return stack[0] if stack.size() > 0 else {}
