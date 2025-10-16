@@ -9,6 +9,19 @@
 ##     godot4-nomono --headless -s res://utils/test_runner_tree.gd
 ##     or
 ##     & "D:\Work\Godot_Binaries\Godot_v4.5-stable_win64\Godot_v4.5-stable_win64.exe" --headless -s res://utils/test_runner_tree.gd
+##
+##
+## Command-line filters (patterns are glob-style (* = any string, ? = any single character); use quotes to avoid shell expansion)
+##   --include="PATTERN"           Whitelist test files by filename
+##   --exclude="PATTERN"           Blacklist  test files by filename.
+##   --include-method="PATTERN"    Whitelist test methods by name (currently must still also start with `test_`).
+##   --exclude-method="PATTERN"    Blacklist  test methods by name.
+## Examples:
+##   godot4 --headless -s res://addons/lbg.godot.gdscript.gdtest/gdtest.gd --include="*enemy*"                              # only files with “enemy” in name
+##   godot4 --headless -s res://addons/lbg.godot.gdscript.gdtest/gdtest.gd --exclude="*_slow.gd"                            # skip files ending with _slow.gd
+##   godot4 --headless -s res://addons/lbg.godot.gdscript.gdtest/gdtest.gd --include-method="*async*"                       # only methods containing “async”
+##   godot4 --headless -s res://addons/lbg.godot.gdscript.gdtest/gdtest.gd --exclude-method="*flaky*"                       # skip methods containing “flaky”
+##   godot4 --headless -s res://addons/lbg.godot.gdscript.gdtest/gdtest.gd --include="*final*" --exclude-method="*flaky*"   # only files with “final” in name and skip methods containing “flaky”
 
 extends SceneTree
 
