@@ -58,6 +58,10 @@ func _initialize():
         quit(1)
         return
 
+    # "Warmup" to prevent issues with timing-dependent tests being run in the _initialize() function
+    await process_frame
+    await process_frame
+
     _discover_test_files()
     await _run_all_tests()
     print_summary()
